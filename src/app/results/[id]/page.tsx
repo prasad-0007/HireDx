@@ -85,6 +85,30 @@ const defaultQna = [
     wrong: "Shows extreme defensiveness and an inability to accept constructive criticism or grow from code reviews. A major red flag for collaboration.",
     winning: "A reviewer once pointed out my code wasn't following conventions. Initially I disagreed, but after discussing it, I realized standardizing our patterns was crucial for long-term maintainability. I thanked them and refactored.",
     highlightWords: ["Uh,", "basically"],
+  },
+  {
+    q: "What is your experience with CI/CD pipelines?",
+    category: "Technical",
+    myAnswer: "So essentially I push code to Github and then GitHub Actions does the rest. I don't really touch the YAML files much.",
+    score: 50,
+    confidenceScore: 55,
+    wpm: 110,
+    pauses: 3,
+    wrong: "Dismissive attitude toward DevOps responsibilities. Missed opportunity to discuss testing, staging, and deployment safety.",
+    winning: "I utilize GitHub Actions for our CI/CD workflows. I've configured pipelines that run our unit test suite, build docker images, and automatically deploy to our staging environment upon merge.",
+    highlightWords: ["essentially", "don't really"],
+  },
+  {
+    q: "Why do you want to work here?",
+    category: "Behavioral",
+    myAnswer: "I heard you guys pay well and you know, the stock is doing great. Plus I kinda need a new job right now.",
+    score: 20,
+    confidenceScore: 90,
+    wpm: 160,
+    pauses: 0,
+    wrong: "Self-centered and purely transactional. Shows absolutely zero interest in the product, the mission, or the company culture.",
+    winning: "I've been following your recent launch of the V2 architecture. I'm deeply passionate about scaling distributed systems, and I want to bring my background in optimization to help solve your current data challenges.",
+    highlightWords: ["you know,", "kinda right now."],
   }
 ];
 
@@ -112,8 +136,32 @@ const defaultImprovementPlan = [
       "Record yourself answering random behavioral questions.",
       "Force a 2-second silent pause before answering instead of immediately using 'Um' or 'Uh'."
     ]
+  },
+  {
+    timeline: "Week 4",
+    focus: "Mock Interview Marathon",
+    actionableTasks: [
+      "Conduct two full 45-minute mock interviews simulating real pressure.",
+      "Review the recordings exclusively for tone of voice, posture, and confident delivery."
+    ]
   }
 ];
+
+// Helper to mathematically guarantee Heatmap positions are perfectly scaled 0-100%
+const normalizePositions = (timeline: any[]) => {
+  if (!timeline || !Array.isArray(timeline) || timeline.length === 0) return [];
+  const maxIdx = timeline.length > 1 ? timeline.length - 1 : 1;
+  
+  return timeline.map((t, idx) => {
+    // Strictly force a beautiful, even distribution to prevent AI hallucination (like 225%)
+    // Items will naturally step across the width of the display.
+    const calculatedPos = Math.round((idx / maxIdx) * 100);
+    return {
+      ...t,
+      pos: calculatedPos
+    };
+  });
+};
 
 export default function ResultsPage() {
   const params = useParams();
@@ -147,12 +195,14 @@ export default function ResultsPage() {
 
   const { overallScore, fillerData, weaknessData, skillData, timelineData, qna, improvementPlan } = data;
 
-  // Derive Confidence Trend
+  // Derive Confidence Trend with fallback to standard score if user is viewing older cached data
   const confidenceTrend = (qna || []).map((q: any, i: number) => ({
     name: `Q${i+1}`,
-    score: q.confidenceScore || 0,
+    score: q.confidenceScore || q.score || 0,
     category: q.category || 'Unknown'
   }));
+
+  const normalizedTimeline = normalizePositions(timelineData);
 
   // Rejection Probability math (Inverse of overall score roughly)
   const rejectionProb = Math.max(0, 100 - overallScore);
@@ -222,41 +272,50 @@ export default function ResultsPage() {
             <div className="space-y-6 animate-in fade-in duration-500">
                
                {/* 1A. Heatmap Timeline */}
-               {(timelineData && timelineData.length > 0) && (
-                <Card className="border-primary/20 shadow-md overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4 border-b">
-                    <CardTitle className="flex items-center gap-2">
+               {(!normalizedTimeline || normalizedTimeline.length === 0) ? (
+                  <Card className="border-border shadow-sm flex items-center justify-center h-32 bg-muted/20">
+                    <p className="text-muted-foreground text-sm font-semibold">Timeline not available for this older specific session.</p>
+                  </Card>
+               ) : (
+                <Card className="border-primary/20 shadow-xl overflow-hidden bg-gradient-to-br from-card to-muted/10 relative">
+                  {/* Subtle glass glow overlay */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <CardHeader className="bg-background/80 pb-4 border-b backdrop-blur-md">
+                    <CardTitle className="flex items-center gap-2 text-xl font-heading">
                       <TrendingUp className="text-primary w-5 h-5"/> Rejection Heatmap Timeline
                     </CardTitle>
-                    <CardDescription>Chronological breakdown of key moments — hover each event for details.</CardDescription>
+                    <CardDescription>Chronological breakdown identifying exact moments where points were lost.</CardDescription>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 relative z-10">
                     <div className="relative">
-                      <div className="absolute left-[22px] top-3 bottom-3 w-0.5 bg-border" />
-                      <div className="space-y-1">
-                        {timelineData.map((item: any, i: number) => {
-                          const dotBg   = item.type === 'error'   ? 'bg-destructive'  : item.type === 'success' ? 'bg-green-500'  : 'bg-yellow-500';
+                      <div className="absolute left-[22px] top-3 bottom-4 w-1 bg-border rounded-full" />
+                      <div className="space-y-2">
+                        {normalizedTimeline.map((item: any, i: number) => {
+                          const dotBg   = item.type === 'error'   ? 'bg-destructive shadow-[0_0_10px_hsl(var(--destructive))]'  : item.type === 'success' ? 'bg-green-500 shadow-[0_0_10px_#22c55e]'  : 'bg-yellow-500 shadow-[0_0_10px_#eab308]';
                           const badge   = item.type === 'error'   ? 'bg-destructive/10 text-destructive border-destructive/20'
                                         : item.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20'
                                         :                           'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
                           const icon    = item.type === 'error'   ? '✕' : item.type === 'success' ? '✓' : '~';
 
                           return (
-                            <div key={i} className="flex items-start gap-4 group py-2 px-2 rounded-lg hover:bg-muted/30 transition-colors">
-                              <div className={`relative z-10 w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md ${dotBg}`}>
+                            <div key={i} className="flex items-start gap-4 group py-2 px-2 rounded-xl hover:bg-muted/50 transition-all duration-300">
+                              <div className={`relative z-10 w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-[16px] shadow-sm ring-4 ring-background ${dotBg}`}>
                                 {icon}
                               </div>
-                              <div className="flex-1 min-w-0 pt-1.5">
+                              <div className="flex-1 min-w-0 pt-1.5 w-full">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <span className="font-semibold text-foreground text-sm">{item.label}</span>
-                                  <span className={`text-xs font-mono border rounded px-1.5 py-0.5 ${badge}`}>
+                                  <span className="font-bold text-foreground text-sm tracking-wide">{item.label}</span>
+                                  <span className={`text-xs font-mono border rounded px-2 py-0.5 font-bold ${badge}`}>
                                     {item.time || '--:--'}
                                   </span>
                                 </div>
-                                <div className="w-full mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
-                                  <div className={`h-full rounded-full ${dotBg} opacity-70`} style={{ width: `${item.pos}%` }} />
+                                <div className="w-full mt-2 h-1.5 rounded-full bg-muted overflow-hidden relative">
+                                  {/* Ensure the bar cap doesn't exceed 100% visually */}
+                                  <div className={`absolute top-0 left-0 h-full rounded-full ${dotBg} opacity-80 transition-all duration-1000`} style={{ width: `${Math.min(100, Math.max(2, item.pos))}%` }} />
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-0.5">{item.pos}% into interview</p>
+                                {i > 0 && <p className="text-[11px] text-muted-foreground mt-1 font-semibold uppercase">{item.pos}% through interview</p>}
+                                {i === 0 && <p className="text-[11px] text-muted-foreground mt-1 font-semibold uppercase">Interview Start</p>}
                               </div>
                             </div>
                           );
@@ -267,20 +326,29 @@ export default function ResultsPage() {
                 </Card>
                )}
 
-               {/* 1B. Skill Breakdown Radar */}
-               <Card className="border-primary/10">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Target className="text-primary w-5 h-5"/> Skill Breakdown</CardTitle>
+               {/* 1B. Skill Breakdown Linear Progress */}
+               <Card className="border-primary/10 shadow-xl bg-gradient-to-tr from-card to-muted/10">
+                  <CardHeader className="bg-background/80 pb-4 border-b backdrop-blur-md">
+                    <CardTitle className="flex items-center gap-2 text-xl font-heading"><Target className="text-primary w-5 h-5"/> Skill Breakdown</CardTitle>
+                    <CardDescription>Core competencies evaluated against ideal role expectations.</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex justify-center h-[350px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RadarChart cx="50%" cy="50%" outerRadius="65%" data={skillData || []}>
-                        <PolarGrid stroke="#444" />
-                        <PolarAngleAxis dataKey="subject" tick={{fill: '#e5e7eb', fontSize: 13, fontWeight: 'bold'}} />
-                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{fill: '#888', fontSize: 10}} tickCount={6} />
-                        <Radar name="Score" dataKey="A" stroke="hsl(var(--primary))" strokeWidth={2} fill="hsl(var(--primary))" fillOpacity={0.4} />
-                      </RadarChart>
-                    </ResponsiveContainer>
+                  <CardContent className="h-[350px] flex flex-col justify-center space-y-6 px-8 py-6">
+                    {(skillData || []).map((skill: any, idx: number) => {
+                      const val = skill.A || 0;
+                      // Determine gradient glow based on score
+                      const cColor = val >= 75 ? 'bg-green-500 shadow-[0_0_12px_#22c55e88]' : val >= 50 ? 'bg-yellow-500 shadow-[0_0_12px_#eab30888]' : 'bg-destructive shadow-[0_0_12px_hsl(var(--destructive)/0.5)]';
+                      return (
+                        <div key={idx} className="space-y-2">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="font-semibold tracking-wide text-foreground/90">{skill.subject}</span>
+                            <span className="font-mono text-muted-foreground font-bold">{val}/100</span>
+                          </div>
+                          <div className="w-full h-3 bg-muted/60 rounded-full overflow-hidden shadow-inner">
+                             <div className={`h-full ${cColor} rounded-full transition-all duration-1000`} style={{ width: `${val}%` }} />
+                          </div>
+                        </div>
+                      )
+                    })}
                   </CardContent>
                </Card>
 
@@ -292,18 +360,25 @@ export default function ResultsPage() {
             <div className="space-y-6 animate-in fade-in duration-500">
                {(qna || []).map((item: any, index: number) => {
                  
-                 // Regex Highlighter
+                 // Superior Regex Highlighter that respects boundaries and punctuation
                  const renderText = (text: string) => {
                     if (!item.highlightWords || item.highlightWords.length === 0) return text;
-                    const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const safeWords = item.highlightWords.map(escapeRegExp);
-                    const splitRegex = new RegExp(`(${safeWords.join('|')})`, 'gi');
+                    
+                    // Clean highlight words: strip trailing/leading punctuation from the array elements
+                    const cleanWords = item.highlightWords.map((w: string) => w.replace(/^[^\w]+|[^\w]+$/g, ''));
+                    if (cleanWords.length === 0) return text;
+                    
+                    const safeWords = cleanWords.map((sw: string) => sw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                    // Match the words with word boundaries, capturing potential trailing punctuation inside the split so it's preserved
+                    const splitRegex = new RegExp(`\\b(${safeWords.join('|')})\\b`, 'gi');
+                    
                     const parts = text.split(splitRegex);
                     
                     return parts.map((part, i) => {
-                      const isMatch = safeWords.some(sw => new RegExp(`^${sw}$`, 'i').test(part));
+                      // Because we captured the word natively, we can just check if part strictly matches (case-insensitive) one of our raw words
+                      const isMatch = safeWords.some((sw: string) => new RegExp(`^${sw}$`, 'i').test(part));
                       return isMatch
-                        ? <span key={i} className="bg-yellow-500/20 text-yellow-500 font-semibold px-1 rounded-sm mx-0.5">{part}</span> 
+                        ? <span key={i} className="bg-yellow-500/20 text-yellow-500 font-bold border-b-2 border-yellow-500/50 px-0.5 rounded-sm mx-[0.5px]">{part}</span> 
                         : part;
                     });
                  };

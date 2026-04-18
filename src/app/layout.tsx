@@ -13,6 +13,8 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 export const metadata: Metadata = {
   title: "HireDx | Interview Rejection Analysis",
   description: "AI-powered interview analysis system. Know why you lost. Win the next one.",
@@ -24,13 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${outfit.variable} dark antialiased`}
-      style={{ colorScheme: "dark" }}
-    >
-      <body className="min-h-screen bg-background text-foreground flex flex-col font-sans">
-        <TooltipProvider>{children}</TooltipProvider>
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/20">
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
