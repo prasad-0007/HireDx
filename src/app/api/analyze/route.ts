@@ -4,6 +4,10 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 
+// Extend API route timeout to 5 minutes to handle large video processing
+// Default Next.js timeout is 30s which is too short for Gemini video analysis
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   let tmpFilePath = '';
   let fileObj: File | null = null;

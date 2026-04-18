@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # HireDx - Interview Rejection Analysis System
 
 Welcome to **HireDx** - built for DevClash 2026.
@@ -28,3 +29,6 @@ Click "View Demo Analysis" or click "Sign In" on the Login page to directly acce
 2. Get your Google Gemini API Key from Google AI Studio.
 3. Copy `.env.example` to `.env.local` and add your keys.
 4. Run the SQL located in `supabase/migrations/0000_init.sql` in your Supabase SQL Editor to spawn the tables.
+=======
+# HireDx
+>>>>>>> d7e4bef5aa99343a5d8dbd3604c1af311b4e73cd

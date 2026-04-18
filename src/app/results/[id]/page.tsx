@@ -135,38 +135,64 @@ export default function ResultsPage() {
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="text-primary w-5 h-5"/> Rejection Heatmap Timeline
             </CardTitle>
-            <CardDescription>Chronological breakdown identifying exactly when you lost the interviewer's interest or signaled lack of confidence.</CardDescription>
+            <CardDescription>Chronological breakdown of key moments — hover each event for details.</CardDescription>
           </CardHeader>
-          <CardContent className="p-8">
-             <div className="relative h-24 flex items-center">
-                <div className="absolute left-0 right-0 h-2 bg-muted rounded-full"></div>
-                {timelineData.map((item: any, i: number) => (
-                  <div 
-                    key={i} 
-                    className="absolute flex flex-col items-center -translate-x-1/2 group"
-                    style={{ left: `${Math.max(5, Math.min(item.pos, 95))}%` }}
-                  >
-                    <div className={`text-xs font-bold mb-2 pb-1 px-2 rounded-md transition-opacity opacity-0 group-hover:opacity-100 absolute bottom-full whitespace-nowrap shadow-md
-                      ${item.type === 'error' ? 'bg-destructive text-white' : item.type === 'success' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white'}
-                    `}>
-                      {item.label}
+          <CardContent className="p-6">
+            {/* Vertical stepped timeline — no overlap possible */}
+            <div className="relative">
+              {/* Vertical connector line */}
+              <div className="absolute left-[22px] top-3 bottom-3 w-0.5 bg-border" />
+
+              <div className="space-y-1">
+                {timelineData.map((item: any, i: number) => {
+                  const dotBg   = item.type === 'error'   ? 'bg-destructive'  : item.type === 'success' ? 'bg-green-500'  : 'bg-yellow-500';
+                  const badge   = item.type === 'error'   ? 'bg-destructive/10 text-destructive border-destructive/20'
+                                : item.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                :                           'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+                  const icon    = item.type === 'error'   ? '✕' : item.type === 'success' ? '✓' : '~';
+
+                  return (
+                    <div key={i} className="flex items-start gap-4 group py-2 px-2 rounded-lg hover:bg-muted/30 transition-colors">
+                      {/* Dot */}
+                      <div className={`relative z-10 w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md ${dotBg}`}>
+                        {icon}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 pt-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-foreground text-sm">{item.label}</span>
+                          <span className={`text-xs font-mono border rounded px-1.5 py-0.5 ${badge}`}>
+                            {item.time || '--:--'}
+                          </span>
+                          <span className={`text-xs border rounded px-1.5 py-0.5 capitalize ${badge}`}>
+                            {item.type}
+                          </span>
+                        </div>
+                        <div className="w-full mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${dotBg} opacity-70`}
+                            style={{ width: `${item.pos}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{item.pos}% into interview</p>
+                      </div>
                     </div>
-                    <div className={`w-4 h-4 rounded-full border-2 border-background cursor-pointer hover:scale-125 transition-transform z-10
-                      ${item.type === 'error' ? 'bg-destructive' : item.type === 'success' ? 'bg-green-500' : 'bg-yellow-500'}
-                    `} />
-                    <div className="text-xs text-muted-foreground font-medium mt-2">{item.time || "--:--"}</div>
-                  </div>
-                ))}
-             </div>
-             
-             <div className="flex flex-wrap items-center justify-center gap-6 mt-4 pt-4 border-t text-sm text-muted-foreground">
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500"/> Strong Signal</span>
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500"/> Hesitation / Mid</span>
-               <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-destructive"/> Red Flag / Weakness</span>
-             </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-6 pt-4 border-t text-sm text-muted-foreground">
+              <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500"/> Strong Signal</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500"/> Hesitation / Mid</span>
+              <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-destructive"/> Red Flag / Weakness</span>
+            </div>
           </CardContent>
         </Card>
         )}
+
 
         {/* CHARTS GRID */}
         <div className="grid md:grid-cols-3 gap-6">
