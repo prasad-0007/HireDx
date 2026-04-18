@@ -7,7 +7,7 @@ export function Footer() {
       {/* Decorative gradient overlay */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
       
-      <div className="container mx-auto px-4 md:px-8 py-12">
+      <div className="container mx-auto px-4 md:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
           
           {/* Brand Col */}
@@ -32,22 +32,25 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Links Col */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Features</h3>
-            <ul className="space-y-2 text-sm">
+          {/* Spacer for proper grid alignment */}
+          <div className="hidden md:block col-span-1"></div>
+
+          {/* Links Col 1 */}
+          <div className="space-y-4 md:col-span-1 border-l pl-0 md:pl-6 border-border/50">
+            <h3 className="font-semibold text-foreground tracking-wide uppercase text-xs">Platform</h3>
+            <ul className="space-y-3 text-sm">
               <li><Link href="#" className="hover:text-primary transition-colors">Speech Analytics</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Behavioral Breakdown</Link></li>
               <li><Link href="#" className="hover:text-primary transition-colors">Action Roadmaps</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors hover:underline flex items-center gap-1">Live Recording <Badge className="text-[10px] h-4 bg-primary/20 text-primary border-0 px-1 ml-1 hover:bg-primary/30">SOON</Badge></Link></li>
+              <li><Link href="#" className="hover:text-primary transition-colors hover:underline flex items-center gap-2">Mock Interview <Badge className="text-[10px] h-4 bg-primary/20 text-primary border-0 px-1 hover:bg-primary/30">SOON</Badge></Link></li>
             </ul>
           </div>
 
-          {/* Guidelines Col */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Legal & Privacy</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-green-500" /> <span className="hover:text-foreground cursor-pointer">Privacy First Policy</span></li>
+          {/* Guidelines Col 2 */}
+          <div className="space-y-4 md:col-span-1 border-l pl-0 md:pl-6 border-border/50">
+            <h3 className="font-semibold text-foreground tracking-wide uppercase text-xs">Company & Legal</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-green-500" /> <span className="hover:text-foreground cursor-pointer font-medium">Privacy Protected</span></li>
               <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Data Processing</Link></li>
             </ul>
@@ -55,8 +58,12 @@ export function Footer() {
           
         </div>
 
-        <div className="mt-12 pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+        <div className="mt-16 sm:mt-24 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <p>© {new Date().getFullYear()} HireDx. All rights reserved.</p>
+          <div className="flex gap-4">
+             <Link href="#" className="hover:text-foreground">Support</Link>
+             <Link href="#" className="hover:text-foreground">Status</Link>
+          </div>
         </div>
       </div>
     </footer>

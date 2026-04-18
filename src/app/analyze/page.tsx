@@ -86,14 +86,6 @@ export default function AnalyzePage() {
       <Navbar />
       <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full flex flex-col py-10">
 
-        {/* Top hint banner */}
-        <div className="mb-8 p-4 bg-primary/10 border border-primary/30 rounded-lg flex items-start gap-3">
-          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          <div className="text-sm text-foreground max-w-2xl text-balance">
-            <strong>Hackathon Hint:</strong> Upload a file for a REAL AI analysis using Gemini 2.5. Or skip upload and click Analyze to view the instant Demo Dashboard.
-          </div>
-        </div>
-
         {/* ── PROGRESS UI ── shown only while analyzing a real file */}
         {isUploading && file && (
           <Card className="mb-8 border-primary/20 shadow-lg overflow-hidden">

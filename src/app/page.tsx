@@ -14,31 +14,47 @@ export default function Home() {
         <section className="relative overflow-hidden py-24 lg:py-32 flex flex-col items-center justify-center text-center">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
           <div className="container px-4 mx-auto max-w-5xl flex flex-col items-center gap-6">
-            <Badge variant="outline" className="px-4 py-1.5 text-sm border-primary/30 bg-primary/10 text-primary mb-4">
-              DevClash 2026 Hackathon Entity 🏆
-            </Badge>
-            <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-balance">
-              Know Why You Lost. <br className="hidden md:block"/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Win the Next One.</span>
+            <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-balance leading-tight">
+              You get the interview. <br className="hidden md:block"/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">You don't get the offer.</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground text-balance max-w-2xl mt-4">
-              Stop guessing why you were rejected. Upload your interview recording and get deep AI-powered analysis on confidence drops, filler words, and weak answers.
+            <p className="text-lg md:text-xl text-muted-foreground text-balance max-w-3xl mt-4">
+              Stop guessing why you were rejected. Upload an audio or video recording of your last interview, and our AI will expose the exact psychological, pacing, and structural errors that lost the recruiter's interest. 
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full justify-center">
               <Link href="/analyze">
-                <Button size="lg" className="h-12 px-8 text-base w-full sm:w-auto shadow-lg shadow-primary/20">
-                  Analyze My Interview <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" className="h-14 px-10 text-lg w-full sm:w-auto shadow-[0_0_20px_hsl(var(--primary)/30)] hover:shadow-[0_0_30px_hsl(var(--primary)/50)] transition-shadow">
+                  Analyze My Interview <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
                 </Button>
               </Link>
-              <Link href="/dashboard/demo">
-                <Button size="lg" variant="outline" className="h-12 px-8 text-base w-full sm:w-auto bg-background/50 backdrop-blur-md">
+              <Link href="/results/demo">
+                <Button size="lg" variant="outline" className="h-14 px-8 text-base w-full sm:w-auto bg-background/50 backdrop-blur-md border-primary/20 hover:bg-primary/5">
                   View Demo Analysis
                 </Button>
               </Link>
             </div>
+            
+            <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 max-w-4xl text-left border-t border-border/50 pt-16 w-full">
+               <div className="flex flex-col gap-3 items-center text-center">
+                 <div className="w-12 h-12 rounded-full border border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">1</div>
+                 <h4 className="font-bold text-lg font-heading">Record or Upload</h4>
+                 <p className="text-sm text-muted-foreground text-balance">Drop in your recording. We process it privately on Google supercomputers and immediately delete it.</p>
+               </div>
+               <div className="flex flex-col gap-3 items-center text-center mt-8 md:mt-0 relative">
+                 <div className="hidden md:block absolute top-6 -left-[20%] w-[40%] h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                 <div className="w-12 h-12 rounded-full border border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">2</div>
+                 <h4 className="font-bold text-lg font-heading">AI Brain Extracts</h4>
+                 <p className="text-sm text-muted-foreground text-balance">We parse pacing, hesitation, behavioral patterns, and rank the exact moments you lost confidence.</p>
+               </div>
+               <div className="flex flex-col gap-3 items-center text-center mt-8 md:mt-0 relative">
+                 <div className="hidden md:block absolute top-6 -left-[20%] w-[40%] h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                 <div className="w-12 h-12 rounded-full border border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">3</div>
+                 <h4 className="font-bold text-lg font-heading">Get the Blueprint</h4>
+                 <p className="text-sm text-muted-foreground text-balance">Receive a brutal, honest Rejection Heatmap and a 4-week actionable checklist to win the next one.</p>
+               </div>
+            </div>
           </div>
         </section>
-
         {/* FEATURES */}
         <section className="py-20 bg-muted/30">
           <div className="container px-4 mx-auto max-w-6xl">
