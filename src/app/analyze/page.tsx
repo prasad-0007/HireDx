@@ -70,9 +70,15 @@ export default function AnalyzePage() {
         throw new Error(data.error || "Analysis failed");
       }
 
-      const resultId = `real_analysis_${Date.now()}`;
-      localStorage.setItem(`hiredx_${resultId}`, JSON.stringify(data.result));
-      router.push(`/results/${resultId}`);
+      if (data.databaseId) {
+        // Logged in: route directly to the persistent Database record
+        router.push(`/results/${data.databaseId}`);
+      } else {
+        // Logged out: route to local browser cache
+        const resultId = `real_analysis_${Date.now()}`;
+        localStorage.setItem(`hiredx_${resultId}`, JSON.stringify(data.result));
+        router.push(`/results/${resultId}`);
+      }
 
     } catch (err: any) {
       setErrorObj(err.message || "Failed to analyze. Did you add your GEMINI_API_KEY?");

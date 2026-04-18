@@ -96,9 +96,11 @@ export function Navbar() {
                            <FileAudio className="w-4 h-4" /> Analyze Recording
                          </button>
                        </Link>
-                       <button className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted text-muted-foreground rounded-md transition-colors">
-                         <User className="w-4 h-4" /> My Profile
-                       </button>
+                       <Link href="/profile" onClick={() => setDropdownOpen(false)}>
+                         <button className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted text-muted-foreground rounded-md transition-colors">
+                           <User className="w-4 h-4" /> My Profile
+                         </button>
+                       </Link>
                      </div>
                      <div className="p-1 border-t border-border/50 mt-1">
                        <button onClick={handleLogout} className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md transition-colors font-medium">

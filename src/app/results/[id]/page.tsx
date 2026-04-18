@@ -12,6 +12,7 @@ import {
 import { Target, TrendingUp, AlertTriangle, FileAudio, Play, Sparkles, CheckCircle2, XCircle, MessageSquare, StopCircle, Gauge, Activity, Compass, Clock, BookOpen, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 // --- FALLBACK DEMO DATA WITH NEW PS6 SCHEMA ---
 const defaultFillerData = [
@@ -169,26 +170,48 @@ export default function ResultsPage() {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    if (params.id && typeof params.id === 'string' && params.id.startsWith("real_analysis_")) {
-       const savedRaw = localStorage.getItem(`hiredx_${params.id}`);
-       if (savedRaw) {
-          try {
-            const parsed = JSON.parse(savedRaw);
-            setData(parsed);
-            return;
-          } catch(e) {}
-       }
+    async function loadData() {
+      if (!params.id || typeof params.id !== 'string') return;
+      
+      // 1. Check if it's a UUID (Supabase persistent row)
+      if (params.id.length === 36 && params.id.includes('-')) {
+         try {
+           const supabase = createClient();
+           const { data: dbRow, error } = await supabase.from('interviews').select('report_data').eq('id', params.id).single();
+           if (dbRow && !error) {
+             setData(dbRow.report_data);
+             return;
+           }
+         } catch(e) {
+           console.error("Failed fetching Supabase history:", e);
+         }
+      }
+
+      // 2. Check if it's a local unauthenticated analysis session
+      if (params.id.startsWith("real_analysis_")) {
+         const savedRaw = localStorage.getItem(`hiredx_${params.id}`);
+         if (savedRaw) {
+            try {
+              const parsed = JSON.parse(savedRaw);
+              setData(parsed);
+              return;
+            } catch(e) {}
+         }
+      }
+
+      // Fallback
+      setData({
+        overallScore: 42,
+        fillerData: defaultFillerData,
+        weaknessData: defaultWeaknessData,
+        skillData: defaultSkillData,
+        timelineData: defaultTimelineData,
+        qna: defaultQna,
+        improvementPlan: defaultImprovementPlan
+      });
     }
-    // Fallback
-    setData({
-      overallScore: 42,
-      fillerData: defaultFillerData,
-      weaknessData: defaultWeaknessData,
-      skillData: defaultSkillData,
-      timelineData: defaultTimelineData,
-      qna: defaultQna,
-      improvementPlan: defaultImprovementPlan
-    });
+
+    loadData();
   }, [params.id]);
 
   if (!data) return <div className="p-20 text-center text-muted-foreground flex justify-center items-center gap-2"><Loader2 className="animate-spin w-5 h-5"/> Compiling Report...</div>;
