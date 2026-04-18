@@ -43,19 +43,11 @@ I will provide you an interview recording for the role of "${role}".
 
 Step 1 — TRANSCRIBE: Listen carefully and mentally transcribe the full conversation. Identify every question asked and every answer given.
 
-Step 2 — SPEECH ANALYSIS: For each answer, count filler words (um, uh, like, basically, you know, so, right). Note confidence level based on pauses, hedging language, and decisiveness.
-
-Step 3 — QUALITY ANALYSIS: For each answer, evaluate on:
-  - Clarity: Was the answer easy to follow?
-  - Depth: Did they explain HOW and WHY, not just WHAT?
-  - Structure: Did they use STAR method or logical flow for behavioral questions?
-  - Confidence: Did they sound certain and authoritative?
-  - Relevance: Did they actually answer what was asked?
-  - Delivery: Was the pace, tone, and energy appropriate?
-
-Step 4 — WEAKNESS RANKING: Which weaknesses had the highest impact on rejection probability?
-
-Step 5 — OUTPUT JSON: Based on your analysis above, output the final JSON.
+Step 2 — SPEECH ANALYSIS: For each answer, count filler words (um, uh, like, basically, you know, so). Estimate the pacing/speaking speed in Words Per Minute (WPM). Count notable pauses or silences.
+Step 3 — QUALITY & CONFIDENCE ANALYSIS: For each answer, evaluate Clarity, Depth, Structure, Relevance, and Delivery. Also rate the candidate's Confidence Score (0-100) based on voice modulation, hesitation, and decisiveness. Categorize the question as "Technical" or "Behavioral".
+Step 4 — WEAKNESS RANKING: Identify top weaknesses and explicitly rank their severity as "High", "Medium", or "Low" impact on hiring decisions.
+Step 5 — IMPROVEMENT PLAN: Generate a targeted 4-week practice roadmap based strictly on their weaknesses.
+Step 6 — OUTPUT JSON: Based on your analysis above, output the final JSON.
 
 ---
 
@@ -66,10 +58,14 @@ Input context: Candidate for Software Engineer role answered "Tell me about your
 Expected output for that single QnA entry:
 {
   "q": "Tell me about yourself.",
+  "category": "Behavioral",
   "myAnswer": "Um, so I have like, 2 years of experience. I basically worked on some web projects. You know, I used React and stuff.",
   "score": 32,
-  "wrong": "No structure whatsoever. 4 filler words in 2 sentences. Vague ('some web projects', 'stuff') with zero specifics about impact or achievements. Interviewer gained nothing memorable.",
-  "winning": "I'm a software engineer with 2 years of experience specializing in React and Node.js. At my previous company, I led the frontend migration from a legacy jQuery codebase to React, which reduced page load times by 40% and improved team velocity significantly.",
+  "confidenceScore": 45,
+  "wpm": 110,
+  "pauses": 3,
+  "wrong": "No structure whatsoever. 4 filler words in 2 sentences. Vague ('some web projects', 'stuff') with zero specifics about impact or achievements.",
+  "winning": "I'm a software engineer with 2 years of experience specializing in React and Node.js. At my previous company, I led the frontend migration from a legacy jQuery codebase to React, which reduced page load times by 40%.",
   "highlightWords": ["Um,", "like,", "basically", "You know,", "stuff"]
 }
 
@@ -83,7 +79,7 @@ Now analyze the actual recording provided and respond with ONLY a raw JSON objec
   "overallScore": <number 0-100>,
   "weaknesses": "<2-3 sentence summary of the primary reasons this candidate would likely be rejected>",
   "fillerData": [{ "name": "<filler word>", "count": <total count across entire interview> }],
-  "weaknessData": [{ "name": "<weakness category>", "value": <impact score 0-100, higher = more impactful> }],
+  "weaknessData": [{ "name": "<weakness category>", "value": <impact score 0-100>, "severity": "High" | "Medium" | "Low" }],
   "skillData": [
     { "subject": "Clarity", "A": <0-100>, "fullMark": 100 },
     { "subject": "Depth", "A": <0-100>, "fullMark": 100 },
@@ -96,19 +92,36 @@ Now analyze the actual recording provided and respond with ONLY a raw JSON objec
   "qna": [
     {
       "q": "<exact question asked>",
-      "myAnswer": "<verbatim candidate answer from transcript>",
+      "category": "Technical" | "Behavioral",
+      "myAnswer": "<verbatim candidate answer>",
       "score": <0-100>,
-      "wrong": "<specific, detailed critique — what exactly failed and why>",
-      "winning": "<concrete example of a strong answer to this same question>",
+      "confidenceScore": <0-100>,
+      "wpm": <number, approx speaking speed>,
+      "pauses": <number, count of noticeable silences/hesitations>,
+      "wrong": "<specific critique — vague storytelling, weak technical, missing examples, etc>",
+      "winning": "<concrete example of a strong answer>",
       "highlightWords": ["<weak or filler words from myAnswer to highlight>"]
+    }
+  ],
+  "improvementPlan": [
+    {
+      "timeline": "Week 1",
+      "focus": "<Focus Area e.g. STAR Method Mastery>",
+      "actionableTasks": ["<Task 1>", "<Task 2>"]
+    },
+    {
+      "timeline": "Week 2",
+      "focus": "<Focus Area>",
+      "actionableTasks": ["<Task 1>", "<Task 2>"]
     }
   ]
 }
 
 CRITICAL RULES:
-- qna MUST contain every question from the interview (minimum 3 entries)
-- weaknessData MUST have at least 3 entries ranked by impact
-- Output nothing except the JSON object`;
+- qna MUST contain every question from the interview (minimum 3 entries).
+- improvementPlan MUST have 3 to 4 timeline steps.
+- weaknessData MUST explicitly rank weaknesses by severity ("High" impact ones first).
+- Output nothing except the JSON object.`;
 
   // 3. Call Gemini
   const response = await ai.models.generateContent({
