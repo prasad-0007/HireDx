@@ -164,10 +164,206 @@ const normalizePositions = (timeline: any[]) => {
   });
 };
 
+// ─── Roadmap Plan Selector Sub-Component ────────────────────────────────────
+type PlanId = 'intensive' | 'balanced' | 'gentle';
+
+const PLANS: Record<PlanId, {
+  id: PlanId; label: string; duration: string; tagline: string; icon: string;
+  accentClass: string; borderClass: string; badgeClass: string; description: string;
+  weeks: { week: string; focus: string; tasks: string[] }[];
+}> = {
+  intensive: {
+    id: 'intensive', label: 'Intensive Track', duration: '12 Weeks',
+    tagline: 'For scores below 45 — complete rebuild', icon: '🔥',
+    accentClass: 'text-red-500', borderClass: 'border-red-500/40', badgeClass: 'bg-red-500/10 text-red-500 border-red-500/30',
+    description: 'A rigorous 12-week programme with daily drills, structured coaching, and progressive challenges. Built for candidates who need a full interview skill overhaul.',
+    weeks: [
+      { week: 'Week 1', focus: 'Awareness & Baseline', tasks: ['Re-read every "What Went Wrong" entry in your Transcript tab and write each mistake in a journal.', 'Record a 3-minute self-introduction and watch it back — note every filler word and dead silence.'] },
+      { week: 'Week 2', focus: 'Eliminating Filler Words', tasks: ['Identify your top 3 filler words from this report. Tap a counter app every time you catch yourself saying one.', 'Practice the "silent pause" — replace "Um" with 2 seconds of deliberate silence before answering.'] },
+      { week: 'Week 3', focus: 'STAR Method Foundation', tasks: ['Write 5 career stories in strict Situation-Task-Action-Result format. No narrative drift allowed.', 'Deliver each story in exactly 90 seconds. Time yourself and cut ruthlessly if you go over.'] },
+      { week: 'Week 4', focus: 'STAR Method Drilling', tasks: ['Expand your story bank to 10 STAR stories covering conflict, failure, leadership, and impact scenarios.', 'Practice with a partner or record yourself — check that the Result is always specific and quantifiable.'] },
+      { week: 'Week 5', focus: 'Technical Depth', tasks: ['For every technical question answer, add: "I chose this because… The trade-off is…"', 'Study one system design concept per day (caching, replication, load balancing, sharding). 30-min sessions.'] },
+      { week: 'Week 6', focus: 'Technical Assertiveness', tasks: ['Remove all hedging language: "I think", "maybe", "probably". State decisions as facts.', 'Practice explaining a past technical decision end-to-end: problem → options considered → decision → outcome.'] },
+      { week: 'Week 7', focus: 'Pacing & Vocal Confidence', tasks: ['Record 5 behavioral answers. Listen back and verify your WPM stays between 120–150 throughout.', 'Consciously lower your pitch slightly at the end of sentences — rising intonation signals uncertainty.'] },
+      { week: 'Week 8', focus: 'Role Alignment', tasks: ['For each question from your report, rewrite your answer specifically tailored to the job description you are targeting.', 'Study the company\'s engineering blog or product. Reference their actual work in your answers.'] },
+      { week: 'Week 9', focus: 'Behavioral Mastery', tasks: ['Practice "Tell me about a failure" until you can deliver it with composure and a clear learning outcome.', 'Prepare a concise 60-second closing statement for "Do you have any questions?" that shows strategic thinking.'] },
+      { week: 'Week 10', focus: 'First Mock Simulations', tasks: ['Complete two 45-minute mock interviews on Pramp or with a peer at full pressure — no pausing or restarting.', 'Score yourself on each dimension from this report: Clarity, Depth, Confidence, Structure, Relevance, Delivery.'] },
+      { week: 'Week 11', focus: 'Review & Targeted Re-Drilling', tasks: ['Identify the 2 lowest-scoring dimensions from your mock reviews. Drill those specific skills for 3 days each.', 'Re-record your 3-minute introduction from Week 1 and compare — measure the improvement objectively.'] },
+      { week: 'Week 12', focus: 'Final Polish & Readiness', tasks: ['Complete one full 60-minute interview simulation under maximum pressure with a strict timer.', 'Review the recording exclusively for tone, posture, and executive presence. You are now ready.'] },
+    ]
+  },
+  balanced: {
+    id: 'balanced', label: 'Balanced Track', duration: '8 Weeks',
+    tagline: 'For scores 45–69 — sharpen specific weak points', icon: '⚡',
+    accentClass: 'text-yellow-500', borderClass: 'border-yellow-500/40', badgeClass: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30',
+    description: 'An 8-week targeted programme focused on your identified weak areas. You have a solid foundation — this track sharpens the edges that cost you the offer.',
+    weeks: [
+      { week: 'Week 1', focus: 'Gap Analysis & Prioritisation', tasks: ['List the 3 "High Severity" weaknesses from your Analytics tab. These are your entire focus for the next 4 weeks.', 'Re-answer every question scored below 60 using the "Winning Answer" shown in your Transcript tab as a guide.'] },
+      { week: 'Week 2', focus: 'Answer Structure Overhaul', tasks: ['Force every answer to include one specific metric or data point (%, time saved, revenue impact, team size).', 'Record yourself answering 5 behavioral questions. Check that every answer has a clear Situation, Action, and Result.'] },
+      { week: 'Week 3', focus: 'Confidence & Pacing', tasks: ['Practice the deliberate pause — breathe silently for 2 seconds before each answer instead of filling with "Um".', 'Verify your speaking pace is 120–150 WPM. Record yourself and use a WPM counter tool to measure it precisely.'] },
+      { week: 'Week 4', focus: 'Technical Precision', tasks: ['For any technical answer, always state the trade-off alongside your decision: "I used X because Y, but the cost is Z."', 'Prepare 3 concise technical stories from your experience: one debugging win, one architecture decision, one performance optimization.'] },
+      { week: 'Week 5', focus: 'Role-Specific Alignment', tasks: ['Rewrite your 3 weakest answers to explicitly connect your experience to the target role\'s responsibilities.', 'Research 2 recent technical decisions the company has made publicly and reference them naturally in your answers.'] },
+      { week: 'Week 6', focus: 'Behavioural Depth', tasks: ['Expand your story bank with 5 new STAR stories covering: conflict, failure, influence without authority, ambiguity, and learning from feedback.', 'Practice delivering each story in under 2 minutes with a specific quantified result every time.'] },
+      { week: 'Week 7', focus: 'Mock Interviews', tasks: ['Complete two 30-minute mock interviews on Pramp or with a peer. Use real questions — no soft-ball prompts.', 'Grade yourself on the 6 dimensions shown in your Analytics radar chart. Target above 70 on all of them.'] },
+      { week: 'Week 8', focus: 'Final Review & Confidence Lock-In', tasks: ['Re-record your answers to the 3 questions you scored lowest on in your original report. Compare them side-by-side.', 'Do one final full 45-minute pressure simulation. If you score above 70 in your self-assessment, you are ready.'] },
+    ]
+  },
+  gentle: {
+    id: 'gentle', label: 'Polish Track', duration: '4 Weeks',
+    tagline: 'For scores 70+ — close the final gap', icon: '✨',
+    accentClass: 'text-green-500', borderClass: 'border-green-500/40', badgeClass: 'bg-green-500/10 text-green-500 border-green-500/30',
+    description: "You're already performing at a high level. This 4-week track focuses on executive presence, narrative mastery, and eliminating the final performance ceiling.",
+    weeks: [
+      { week: 'Week 1', focus: 'Narrative Elevation', tasks: ['Elevate your 3 strongest career stories — add a turning point, an emotional stake, and a clear quantified result.', 'Record yourself and listen for any remaining hedging language ("I think", "kind of", "sort of"). Eliminate all of it.'] },
+      { week: 'Week 2', focus: 'Specificity & Impact', tasks: ['Audit every answer for vague language. Replace any remaining generalities with specific names, numbers, and outcomes.', 'Prepare a 90-second "Why this company?" answer that references a specific product, decision, or engineering challenge they have publicly faced.'] },
+      { week: 'Week 3', focus: 'Executive Communication', tasks: ['Practice the bottom-line-up-front (BLUF) technique: give your conclusion first, then the story. This is how senior candidates communicate.', 'Record a full mock answer and evaluate it exclusively for tone: is it calm, deliberate, and authoritative throughout?'] },
+      { week: 'Week 4', focus: 'Full Simulation & Sign-Off', tasks: ['Complete one full 60-minute pressure interview simulation. Aim for zero filler words across the entire session.', 'Review only for executive presence: composure under pressure, confident pauses, and decisive language. If these feel natural, you are ready to interview.'] },
+    ]
+  },
+};
+
+// Task pool for dynamic custom plan generation
+const CUSTOM_TASK_POOL: { focus: string; tasks: string[] }[] = [
+  { focus: 'Awareness & Baseline', tasks: ['Re-read every "What Went Wrong" entry in your Transcript tab and journal each mistake.', 'Record a 3-minute self-introduction and watch it back — note every filler word.'] },
+  { focus: 'Filler Word Elimination', tasks: ['Replace "Um/Uh" with a deliberate 2-second silent pause before every answer.', 'Tap a counter app each time you catch yourself using a filler word during practice.'] },
+  { focus: 'STAR Method Foundation', tasks: ['Write 5 career stories in strict Situation-Task-Action-Result format.', 'Deliver each story in exactly 90 seconds. Cut ruthlessly if you go over.'] },
+  { focus: 'Technical Depth', tasks: ['Append "I chose this because… the trade-off is…" to every technical answer.', 'Study one system design concept per day (caching, replication, sharding). 30 min sessions.'] },
+  { focus: 'Answer Structure & Specificity', tasks: ['Force every answer to include one specific metric or data point.', 'Re-answer every question scored below 60 using the "Winning Answer" from your Transcript tab.'] },
+  { focus: 'Confidence & Pacing', tasks: ['Record 5 behavioral answers — verify your WPM stays between 120–150.', 'Consciously lower your pitch at the end of sentences. Rising intonation signals uncertainty.'] },
+  { focus: 'Technical Assertiveness', tasks: ['Remove all hedging: "I think", "maybe", "probably". State decisions as confident facts.', 'Practice explaining a past technical decision end-to-end: problem → options → decision → outcome.'] },
+  { focus: 'Role-Specific Alignment', tasks: ["Rewrite your 3 weakest answers to connect explicitly to the target role's responsibilities.", 'Research 2 recent company engineering decisions and reference them naturally in answers.'] },
+  { focus: 'Behavioural Depth', tasks: ['Add 5 new STAR stories: conflict, failure, ambiguity, influence, and learning from feedback.', 'Practice each story in under 2 minutes with a specific quantified result every time.'] },
+  { focus: 'Narrative Elevation', tasks: ['Add a turning point, emotional stake, and quantified result to your 3 strongest career stories.', 'Record yourself and ensure answers sound prepared, not improvised.'] },
+  { focus: 'Executive Communication', tasks: ['Practice BLUF: give your conclusion first, then the supporting story.', 'Record a mock answer and grade it: calm, deliberate, and authoritative throughout?'] },
+  { focus: 'Mock Interview Simulation', tasks: ['Complete a 30-minute mock interview on Pramp or with a peer at full pressure.', 'Grade yourself on all 6 dimensions from your Analytics radar chart. Target 70+ on each.'] },
+  { focus: 'Review & Re-Drilling', tasks: ['Identify your 2 lowest-scoring dimensions from mock feedback. Drill those for 3 days each.', 'Re-record your weakest answers from the original report and compare side-by-side.'] },
+];
+
+function generateCustomWeeks(days: number): { week: string; focus: string; tasks: string[] }[] {
+  const numWeeks = days < 7 ? 1 : Math.ceil(days / 7);
+  const useDay = days < 7; // label as "Day N" for short sprints, "Week N" for longer plans
+  return Array.from({ length: numWeeks }, (_, i) => {
+    const pool = CUSTOM_TASK_POOL[i % CUSTOM_TASK_POOL.length];
+    const label = useDay ? `Day ${i + 1}` : `Week ${i + 1}`;
+    return { week: label, focus: pool.focus, tasks: pool.tasks };
+  });
+}
+
+type SelectionMode = PlanId | 'custom';
+
+function RoadmapSelector({ score }: { score: number }) {
+  const recommended: PlanId = score < 45 ? 'intensive' : score < 70 ? 'balanced' : 'gentle';
+  const [selection, setSelection] = useState<SelectionMode>(recommended);
+  const [customDays, setCustomDays] = useState(30);
+
+  const isCustom = selection === 'custom';
+  const customWeeks = generateCustomWeeks(customDays);
+  const activeWeeks  = isCustom ? customWeeks : PLANS[selection as PlanId].weeks;
+  const activeBorder = isCustom ? 'border-purple-500/40' : PLANS[selection as PlanId].borderClass;
+  const activeAccent = isCustom ? 'text-purple-400'    : PLANS[selection as PlanId].accentClass;
+  const activeLabel  = isCustom ? 'Custom Plan'        : PLANS[selection as PlanId].label;
+  const activeIcon   = isCustom ? '🗓️'                : PLANS[selection as PlanId].icon;
+  const activeDesc   = isCustom
+    ? `A ${customDays}-day personalised plan (${customWeeks.length === 1 ? '1 focused week' : `${customWeeks.length} weeks`}) built around your schedule.`
+    : PLANS[selection as PlanId].description;
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
+      <div>
+        <h2 className="text-2xl font-bold font-heading mb-2">Choose Your Recovery Track</h2>
+        <p className="text-muted-foreground text-sm mb-6">
+          Based on your score of <span className="font-bold text-foreground">{score}/100</span>, we recommend the{' '}
+          <span className={`font-bold ${PLANS[recommended].accentClass}`}>{PLANS[recommended].label}</span>.
+        </p>
+
+        {/* 4-card grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(Object.values(PLANS) as typeof PLANS[PlanId][]).map((plan) => (
+            <button key={plan.id} onClick={() => setSelection(plan.id)}
+              className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer
+                ${selection === plan.id ? `${plan.borderClass} bg-card shadow-lg scale-[1.02]` : 'border-border bg-card/40 hover:border-muted-foreground/40'}`}>
+              {plan.id === recommended && (
+                <span className={`absolute -top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full border ${plan.badgeClass}`}>★ Recommended</span>
+              )}
+              <div className="text-3xl mb-3">{plan.icon}</div>
+              <h3 className={`font-bold text-sm font-heading ${selection === plan.id ? plan.accentClass : 'text-foreground'}`}>{plan.label}</h3>
+              <p className="text-xs text-muted-foreground mt-1 font-medium">{plan.duration}</p>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed line-clamp-2">{plan.description}</p>
+            </button>
+          ))}
+
+          {/* Custom card */}
+          <button onClick={() => setSelection('custom')}
+            className={`relative text-left p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer
+              ${isCustom ? 'border-purple-500/40 bg-card shadow-lg scale-[1.02]' : 'border-border bg-card/40 hover:border-muted-foreground/40'}`}>
+            <div className="text-3xl mb-3">🗓️</div>
+            <h3 className={`font-bold text-sm font-heading ${isCustom ? 'text-purple-400' : 'text-foreground'}`}>Custom Plan</h3>
+            <p className="text-xs text-muted-foreground mt-1 font-medium">8 – 90 days</p>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">Set your own timeline. Weekly breakdown generated automatically.</p>
+          </button>
+        </div>
+
+        {/* Slider — only when custom selected */}
+        {isCustom && (
+          <div className="mt-6 p-5 rounded-2xl border-2 border-purple-500/30 bg-purple-500/5 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">Select your preparation window</span>
+              <span className="text-2xl font-bold font-heading text-purple-400">{customDays} days</span>
+            </div>
+            <input type="range" min={1} max={90} step={1} value={customDays}
+              onChange={(e) => setCustomDays(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer accent-purple-500 bg-muted" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>1 day</span>
+              <span className="font-medium text-purple-400">→ {customWeeks.length} week{customWeeks.length > 1 ? 's' : ''} generated</span>
+              <span>90 days</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Active plan detail */}
+      <Card className={`border-2 ${activeBorder} shadow-lg bg-card/50`}>
+        <CardHeader className="text-center pb-8 border-b border-border/50 bg-muted/20 rounded-t-xl">
+          <div className="text-5xl mb-3">{activeIcon}</div>
+          <CardTitle className={`text-3xl font-heading ${activeAccent}`}>{activeLabel}</CardTitle>
+          <CardDescription className="text-base mt-2 max-w-lg mx-auto">{activeDesc}</CardDescription>
+        </CardHeader>
+        <CardContent className="p-8 md:p-12">
+          <div className="relative">
+            <div className="absolute left-6 top-8 bottom-8 w-1 bg-gradient-to-b from-primary/50 via-primary/20 to-transparent rounded-full" />
+            <div className="space-y-12">
+              {activeWeeks.map((week, idx) => (
+                <div key={idx} className="relative pl-16">
+                  <div className="absolute left-4 top-1 w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_hsl(var(--primary))] ring-4 ring-background" />
+                  <h3 className="text-sm font-bold tracking-widest text-primary uppercase mb-1">{week.week}</h3>
+                  <h4 className="text-2xl font-bold font-heading mb-4 text-foreground">{week.focus}</h4>
+                  <div className="space-y-3">
+                    {week.tasks.map((task, tIdx) => (
+                      <div key={tIdx} className="flex items-start gap-3 bg-muted/40 p-4 rounded-xl border border-muted/50 hover:border-primary/30 hover:bg-muted/60 transition-colors">
+                        <BookOpen className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                        <p className="text-foreground/90">{task}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 export default function ResultsPage() {
   const params = useParams();
   const [data, setData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [practiceQuestions, setPracticeQuestions] = useState<any[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -284,6 +480,10 @@ export default function ResultsPage() {
            </button>
            <button onClick={() => setActiveTab('roadmap')} className={`px-4 py-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'roadmap' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
              <Compass className="w-4 h-4"/> Action Roadmap
+           </button>
+           <button onClick={() => setActiveTab('practice')} className={`px-4 py-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === 'practice' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+             <Target className="w-4 h-4"/> Practice Bank
+             <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">NEW</span>
            </button>
         </div>
 
@@ -505,47 +705,164 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* TAB 4: ROADMAP */}
+          {/* TAB 4: ROADMAP — Plan Selector */}
           {activeTab === 'roadmap' && (
+            <RoadmapSelector score={data?.overallScore ?? 50} />
+          )}
+
+          {/* TAB 5: PRACTICE BANK */}
+          {activeTab === 'practice' && (
             <div className="space-y-6 animate-in fade-in duration-500 max-w-4xl mx-auto">
-               <Card className="border-primary/30 shadow-lg bg-card/50">
-                  <CardHeader className="text-center pb-8 border-b border-primary/10 bg-primary/5">
-                    <div className="mx-auto bg-primary/20 p-3 rounded-full w-fit mb-4">
-                      <Sparkles className="w-8 h-8 text-primary" />
+
+              {/* Hero Generate Card */}
+              <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <CardContent className="p-8 flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-3xl">🧩</span>
+                      <Badge className="bg-primary/20 text-primary border-0 text-xs font-bold">AI-GENERATED</Badge>
                     </div>
-                    <CardTitle className="text-3xl font-heading">Your 30-Day Targeted Action Plan</CardTitle>
-                    <CardDescription className="text-base mt-2">
-                       A mathematically generated practice roadmap designed explicitly to eliminate your core rejection signals.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-8 md:p-12">
-                     <div className="relative">
-                       {/* Line */}
-                       <div className="absolute left-6 top-8 bottom-8 w-1 bg-gradient-to-b from-primary/50 via-primary/20 to-transparent rounded-full" />
-                       
-                       <div className="space-y-12">
-                         {(improvementPlan || defaultImprovementPlan).map((week: any, idx: number) => (
-                           <div key={idx} className="relative pl-16">
-                              {/* Glowing node */}
-                              <div className="absolute left-4 top-1 w-5 h-5 rounded-full bg-primary shadow-[0_0_15px_hsl(var(--primary))] ring-4 ring-background" />
-                              
-                              <h3 className="text-sm font-bold tracking-widest text-primary uppercase mb-1">{week.timeline}</h3>
-                              <h4 className="text-2xl font-bold font-heading mb-4 text-foreground">{week.focus}</h4>
-                              
-                              <div className="space-y-3">
-                                {week.actionableTasks.map((task: string, tIdx: number) => (
-                                  <div key={tIdx} className="flex items-start gap-3 bg-muted/40 p-4 rounded-xl border border-muted/50 hover:border-primary/30 hover:bg-muted/60 transition-colors">
-                                    <BookOpen className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-                                    <p className="text-foreground/90">{task}</p>
+                    <h2 className="text-2xl font-bold font-heading mb-2">Your Personalised Question Bank</h2>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      10 questions generated exclusively from your failure pattern — not generic questions, but ones
+                      <span className="text-foreground font-semibold"> calibrated to expose and fix your exact weaknesses.</span>
+                    </p>
+                  </div>
+                  <button
+                    disabled={loadingQuestions}
+                    onClick={async () => {
+                      setLoadingQuestions(true);
+                      setQuestionsError(null);
+                      setPracticeQuestions([]);
+                      try {
+                        const res = await fetch('/api/generate-questions', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            weaknesses: data.weaknesses,
+                            weaknessData: data.weaknessData,
+                            role: data.role_target || 'Software Engineer',
+                            qna: data.qna,
+                          }),
+                        });
+                        const json = await res.json();
+                        if (json.error) throw new Error(json.error);
+                        setPracticeQuestions(json.questions || []);
+                      } catch (e: any) {
+                        setQuestionsError(e.message);
+                      } finally {
+                        setLoadingQuestions(false);
+                      }
+                    }}
+                    className="shrink-0 flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm
+                      shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-105 active:scale-95
+                      transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
+                  >
+                    {loadingQuestions ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+                    ) : practiceQuestions.length > 0 ? (
+                      <><Sparkles className="w-4 h-4" /> Regenerate</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4" /> Generate My Questions</>
+                    )}
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Error state */}
+              {questionsError && (
+                <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-destructive text-sm">
+                  ⚠️ {questionsError}
+                </div>
+              )}
+
+              {/* Loading skeleton */}
+              {loadingQuestions && (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-28 rounded-2xl bg-muted/40 animate-pulse border border-border/40" />
+                  ))}
+                </div>
+              )}
+
+              {/* Question Cards */}
+              {!loadingQuestions && practiceQuestions.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {practiceQuestions.length} targeted questions generated · sorted by difficulty
+                  </p>
+                  {practiceQuestions
+                    .sort((a: any, b: any) => {
+                      const order: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
+                      return (order[a.difficulty] ?? 1) - (order[b.difficulty] ?? 1);
+                    })
+                    .map((q: any, idx: number) => {
+                      const diffColor = q.difficulty === 'Hard'
+                        ? 'text-red-500 bg-red-500/10 border-red-500/20'
+                        : q.difficulty === 'Medium'
+                        ? 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20'
+                        : 'text-green-500 bg-green-500/10 border-green-500/20';
+                      const catColor = q.category === 'Technical'
+                        ? 'text-blue-400 bg-blue-400/10 border-blue-400/20'
+                        : 'text-purple-400 bg-purple-400/10 border-purple-400/20';
+
+                      return (
+                        <Card key={idx} className="border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all duration-200 overflow-hidden group">
+                          <CardContent className="p-0">
+                            {/* Question header */}
+                            <div className="p-5 pb-4">
+                              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                <span className="text-xs font-bold text-muted-foreground w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${catColor}`}>
+                                  {q.category}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${diffColor}`}>
+                                  {q.difficulty}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full border border-border/40 ml-auto">
+                                  Targets: {q.targetedWeakness}
+                                </span>
+                              </div>
+                              <p className="font-semibold text-base text-foreground leading-snug">{q.question}</p>
+                              <p className="text-xs text-muted-foreground mt-2 italic">{q.whyThisQuestion}</p>
+                            </div>
+
+                            {/* Hint section */}
+                            <details className="group/details">
+                              <summary className="px-5 py-3 text-xs font-bold text-primary cursor-pointer border-t border-border/40 bg-primary/5 hover:bg-primary/10 transition-colors flex items-center gap-1.5 list-none">
+                                <TrendingUp className="w-3.5 h-3.5" />
+                                View Answer Strategy
+                                <span className="ml-auto text-muted-foreground group-open/details:rotate-180 transition-transform">▾</span>
+                              </summary>
+                              <div className="px-5 py-4 bg-muted/20 border-t border-border/40 space-y-2">
+                                {(q.answerHint || []).map((hint: string, hIdx: number) => (
+                                  <div key={hIdx} className="flex items-start gap-2 text-sm text-foreground/80">
+                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                                    <span>{hint}</span>
                                   </div>
                                 ))}
                               </div>
-                           </div>
-                         ))}
-                       </div>
-                     </div>
-                  </CardContent>
-               </Card>
+                            </details>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Empty state (before first generation) */}
+              {!loadingQuestions && practiceQuestions.length === 0 && !questionsError && (
+                <div className="border-2 border-dashed border-muted-foreground/20 rounded-2xl p-12 text-center">
+                  <div className="text-5xl mb-4">🧩</div>
+                  <h3 className="font-bold text-lg mb-2">Questions not generated yet</h3>
+                  <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                    Click the button above to generate 10 practice questions calibrated to your exact failure pattern.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

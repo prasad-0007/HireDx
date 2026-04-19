@@ -50,11 +50,16 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center px-4 mx-auto">
-        <Link href="/" className="mr-6 flex items-center space-x-2 group">
-          <div className="bg-primary/10 p-1.5 rounded-xl group-hover:bg-primary/20 transition-colors">
-             <Sparkles className="h-5 w-5 text-primary" />
+        <Link href="/" className="mr-6 flex items-center space-x-3 group">
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-primary/5 p-1 group-hover:bg-primary/10 transition-all border border-primary/10 group-hover:border-primary/20 shadow-inner">
+             {/* eslint-disable-next-line @next/next/no-img-element */}
+             <img 
+               src="/logo.png" 
+               alt="HireDx Logo" 
+               className="h-full w-full object-contain"
+             />
           </div>
-          <span className="font-heading font-bold text-xl tracking-tight hidden sm:inline-block">
+          <span className="font-heading font-bold text-2xl tracking-tight hidden sm:inline-block bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-400 to-emerald-400">
             HireDx
           </span>
         </Link>

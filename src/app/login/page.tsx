@@ -45,8 +45,13 @@ export default function LoginPage() {
 
         <div className="w-full max-w-md relative z-10 backdrop-blur-xl bg-card/60 p-8 rounded-3xl border shadow-2xl border-white/5">
           <div className="flex justify-center mb-6">
-             <div className="bg-primary/20 p-3 rounded-2xl">
-               <Target className="w-8 h-8 text-primary" />
+             <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-primary/5 p-2 border border-primary/10 shadow-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="/logo.png" 
+                  alt="HireDx Logo" 
+                  className="h-full w-full object-contain"
+                />
              </div>
           </div>
           
