@@ -139,7 +139,7 @@ export default function AnalyzePage() {
             <div className="space-y-4">
               <Label htmlFor="role" className="text-lg font-bold">1. Select Interview Target Role</Label>
               <p className="text-sm text-muted-foreground">Our AI adjusts the scoring criteria based on the standard expectations for this role.</p>
-              <Select value={role} onValueChange={setRole}>
+              <Select value={role} onValueChange={(val) => setRole(val ?? "")}>
                 <SelectTrigger id="role" className="h-12 w-full md:w-2/3 shadow-sm border-2">
                   <SelectValue placeholder="e.g. Software Engineer" />
                 </SelectTrigger>
