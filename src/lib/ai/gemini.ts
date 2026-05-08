@@ -17,7 +17,7 @@ export async function analyzeInterviewRecording(filePath: string, mimeType: stri
   if (mimeType.startsWith('video/')) {
     let attempts = 0;
     while (uploadedFile.state === 'PROCESSING' && attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       uploadedFile = await ai.files.get({ name: uploadedFile.name! });
       attempts++;
     }
