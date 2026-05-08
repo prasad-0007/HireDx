@@ -66,10 +66,20 @@ export default function AnalyzePage() {
         body: formData,
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        if (response.status === 413 || text.includes("Request Entity Too Large")) {
+          throw new Error("File is too large for Vercel's 4.5MB upload limit. Please compress the video or use an audio-only file under 4.5MB.");
+        }
+        throw new Error(`Server returned non-JSON error: ${response.statusText}`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || "Analysis failed");
+        throw new Error(data?.error || "Analysis failed");
       }
 
       // Save to Supabase if logged in
