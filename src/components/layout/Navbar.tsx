@@ -50,18 +50,10 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center px-4 mx-auto">
-        <Link href="/" className="mr-6 flex items-center space-x-3 group">
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-primary/5 p-1 group-hover:bg-primary/10 transition-all border border-primary/10 group-hover:border-primary/20 shadow-inner">
-             {/* eslint-disable-next-line @next/next/no-img-element */}
-             <img 
-               src="/logo.png" 
-               alt="HireDx Logo" 
-               className="h-full w-full object-contain"
-             />
+        <Link href="/" className="mr-6 flex items-center space-x-2 group">
+          <div className="p-0 transition-all hover:scale-105 bg-transparent mix-blend-multiply">
+             <img src="/logo.png" alt="Logo" className="h-20 w-auto object-contain" />
           </div>
-          <span className="font-heading font-bold text-2xl tracking-tight hidden sm:inline-block bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-400 to-emerald-400">
-            HireDx
-          </span>
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2 relative">

@@ -11,7 +11,7 @@ export async function analyzeInterviewRecording(filePath: string, mimeType: stri
   const ai = getAI();
 
   // 1. Upload via Gemini File API
-  let uploadedFile = await ai.files.upload({ file: filePath, mimeType: mimeType });
+  let uploadedFile = await ai.files.upload({ file: filePath, config: { mimeType: mimeType } });
 
   // 2. Poll until video processing is complete
   if (mimeType.startsWith('video/')) {
@@ -45,9 +45,9 @@ Step 1 — TRANSCRIBE: Listen carefully and mentally transcribe the full convers
 
 Step 2 — SPEECH ANALYSIS: For each answer, count filler words (um, uh, like, basically, you know, so). Estimate the pacing/speaking speed in Words Per Minute (WPM). Count notable pauses or silences.
 Step 3 — QUALITY & CONFIDENCE ANALYSIS: For each answer, evaluate Clarity, Depth, Structure, Relevance, and Delivery. Also rate the candidate's Confidence Score (0-100) based on voice modulation, hesitation, and decisiveness. Categorize the question as "Technical" or "Behavioral".
-Step 4 — WEAKNESS RANKING: Identify top weaknesses and explicitly rank their severity as "High", "Medium", or "Low" impact on hiring decisions.
-Step 5 — IMPROVEMENT PLAN: Generate a targeted 4-week practice roadmap based strictly on their weaknesses.
-Step 6 — OUTPUT JSON: Based on your analysis above, output the final JSON.
+Step 5 — IMPROVEMENT PLAN: Generate a custom 4-week practice roadmap strictly tailored to exactly what this candidate did wrong in this specific recording. Refer to their specific speaking errors (e.g. "Fix the 14 'basically' fillers used in your Q3 answer") and structural gaps. Avoid generic template tasks.
+Step 6 — PRACTICE BANK: Identify the 10 most critical gaps (technical or behavioral) and generate fresh, targeted practice questions. For each, provide a "Why this?" explanation mapping back to their mistakes, a structured "How to Answer" guide (e.g. STAR), and a professional coach's tip.
+Step 7 — OUTPUT JSON: Based on your analysis above, output the final JSON.
 
 ---
 
@@ -113,6 +113,15 @@ Now analyze the actual recording provided and respond with ONLY a raw JSON objec
       "timeline": "Week 2",
       "focus": "<Focus Area>",
       "actionableTasks": ["<Task 1>", "<Task 2>"]
+    }
+  ],
+  "practiceBank": [
+    {
+      "question": "<targeted practice question derived from analysis>",
+      "category": "Behavioral" | "Technical" | "Clarity",
+      "why": "<exact reason based on a mistake found in their recording>",
+      "answerStructure": "<step-by-step structure for the ideal response>",
+      "tip": "<expert coach's tip on delivery or content>"
     }
   ]
 }

@@ -50,7 +50,7 @@ export default function Home() {
                  <div className="hidden md:block absolute top-6 -left-[20%] w-[40%] h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                  <div className="w-12 h-12 rounded-full border border-primary/20 bg-primary/10 flex items-center justify-center text-primary font-bold text-xl mb-2">3</div>
                  <h4 className="font-bold text-lg font-heading">Get the Blueprint</h4>
-                 <p className="text-sm text-muted-foreground text-balance">Receive a brutal, honest Rejection Heatmap and a 4-week actionable checklist to win the next one.</p>
+                 <p className="text-sm text-muted-foreground text-balance">Receive a brutal, honest Rejection Heatmap and a custom-tailored 2-12 week actionable checklist to win the next one.</p>
                </div>
             </div>
           </div>

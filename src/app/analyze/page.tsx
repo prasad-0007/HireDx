@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { UploadCloud, Mic, Loader2, Info, ShieldCheck, Trash2, Eye, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 // Progress stages shown while video is being processed
 const STAGES = [
@@ -20,6 +21,7 @@ const STAGES = [
 
 export default function AnalyzePage() {
   const router = useRouter();
+  const supabase = createClient();
   const [role, setRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -70,15 +72,26 @@ export default function AnalyzePage() {
         throw new Error(data.error || "Analysis failed");
       }
 
-      if (data.databaseId) {
-        // Logged in: route directly to the persistent Database record
-        router.push(`/results/${data.databaseId}`);
-      } else {
-        // Logged out: route to local browser cache
-        const resultId = `real_analysis_${Date.now()}`;
-        localStorage.setItem(`hiredx_${resultId}`, JSON.stringify(data.result));
-        router.push(`/results/${resultId}`);
+      // Save to Supabase if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      const resultId = `real_analysis_${Date.now()}`;
+      
+      if (user) {
+        try {
+          await supabase.from('interviews').insert({
+            id: resultId.replace('real_analysis_', ''), // Optional: use UUID format or just Date.now suffix
+            user_id: user.id,
+            overall_score: data.result.overallScore,
+            role_target: role,
+            report_data: data.result
+          });
+        } catch (supabaseErr) {
+          console.error("Failed to save to Supabase:", supabaseErr);
+        }
       }
+
+      localStorage.setItem(`hiredx_${resultId}`, JSON.stringify(data.result));
+      router.push(`/results/${resultId}`);
 
     } catch (err: any) {
       setErrorObj(err.message || "Failed to analyze. Did you add your GEMINI_API_KEY?");
@@ -139,7 +152,7 @@ export default function AnalyzePage() {
             <div className="space-y-4">
               <Label htmlFor="role" className="text-lg font-bold">1. Select Interview Target Role</Label>
               <p className="text-sm text-muted-foreground">Our AI adjusts the scoring criteria based on the standard expectations for this role.</p>
-              <Select value={role} onValueChange={(val) => setRole(val ?? "")}>
+              <Select value={role} onValueChange={(val) => setRole(val || "")}>
                 <SelectTrigger id="role" className="h-12 w-full md:w-2/3 shadow-sm border-2">
                   <SelectValue placeholder="e.g. Software Engineer" />
                 </SelectTrigger>

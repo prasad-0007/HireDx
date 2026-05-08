@@ -13,8 +13,7 @@ export function Footer() {
           {/* Brand Col */}
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-2 font-bold font-heading text-xl text-foreground">
-              <Target className="w-6 h-6 text-primary" />
-              HireDx
+              <img src="/logo.png" alt="HireDx Logo" className="h-12 w-auto mix-blend-multiply" />
             </div>
             <p className="text-sm text-balance leading-relaxed">
               Decoding interview failures into actionable roadmaps. Win the next one.

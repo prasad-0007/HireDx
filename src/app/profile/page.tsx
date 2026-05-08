@@ -1,202 +1,163 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { createClient } from "@/utils/supabase/client";
-import { Loader2, Trash2, ExternalLink, Calendar, Target, Activity, RefreshCw } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, History, ChevronRight, FileAudio, Calendar, Target, LogIn } from "lucide-react";
+import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 
-interface InterviewRow {
-  id: string;
-  created_at: string;
-  overall_score: number;
-  role_target: string | null;
-}
-
-// Singleton client — created once outside the component to prevent re-render loops
-const supabase = createClient();
-
 export default function ProfilePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [interviews, setInterviews] = useState<InterviewRow[]>([]);
+  const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  const fetchInterviews = useCallback(async (userId: string) => {
-    setFetchError(null);
-    const { data, error } = await supabase
-      .from("interviews")
-      .select("id, created_at, overall_score, role_target")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("[Profile] Supabase fetch error:", error);
-      setFetchError(error.message);
-      return;
-    }
-    setInterviews(data ?? []);
-  }, []);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
-    async function init() {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+    async function fetchInterviews() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
 
-      if (authError || !user) {
-        router.push("/login");
+      if (!user) {
+        setLoading(false);
         return;
       }
 
-      setUser(user);
-      await fetchInterviews(user.id);
+      const { data, error } = await supabase
+        .from('interviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching interviews:", error);
+      } else {
+        setInterviews(data || []);
+      }
       setLoading(false);
     }
-    init();
-  }, [router, fetchInterviews]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Permanently delete this interview record? This cannot be undone.")) return;
-    // Optimistic UI — remove immediately
-    setInterviews((prev) => prev.filter((item) => item.id !== id));
-    const { error } = await supabase.from("interviews").delete().eq("id", id);
-    if (error) {
-      alert("Delete failed: " + error.message);
-      // Re-fetch to restore accurate state
-      if (user) fetchInterviews(user.id);
-    }
-  };
+    fetchInterviews();
+  }, []);
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen bg-background">
+      <div className="flex flex-col min-h-screen bg-muted/10">
         <Navbar />
-        <main className="flex-1 flex justify-center items-center gap-3 text-muted-foreground">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          <span>Loading your profile...</span>
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="animate-spin w-8 h-8 text-primary" />
+          <span className="ml-3 text-lg font-medium text-muted-foreground">Loading history...</span>
         </main>
+        <Footer />
       </div>
     );
   }
 
-  const getScoreStyle = (score: number) => {
-    if (score >= 75) return { ring: "border-green-500/40 shadow-green-500/10", badge: "text-green-500 bg-green-500/10" };
-    if (score >= 50) return { ring: "border-yellow-500/40 shadow-yellow-500/10", badge: "text-yellow-500 bg-yellow-500/10" };
-    return { ring: "border-red-500/40 shadow-red-500/10", badge: "text-red-500 bg-red-500/10" };
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-muted/10">
       <Navbar />
-      <main className="flex-1 container max-w-6xl mx-auto px-4 py-12">
-
-        {/* Header */}
-        <div className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-heading font-bold mb-2">My Profile</h1>
-            <p className="text-muted-foreground flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse" />
-              {user?.email}
-            </p>
+      <main className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full py-10">
+        
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-3 bg-primary/10 rounded-2xl">
+            <History className="w-8 h-8 text-primary" />
           </div>
-          <Link href="/analyze">
-            <Button className="shadow-lg shadow-primary/20">+ New Analysis</Button>
-          </Link>
+          <div>
+            <h1 className="text-4xl font-bold font-heading">Interview History</h1>
+            <p className="text-muted-foreground">Review your past performance and track your growth.</p>
+          </div>
         </div>
 
-        {/* Section heading */}
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-foreground/80">
-          <Activity className="w-5 h-5 text-primary" />
-          Interview History
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto h-7 w-7 text-muted-foreground"
-            onClick={() => user && fetchInterviews(user.id)}
-            title="Refresh"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
-        </h2>
-
-        {/* Error state */}
-        {fetchError && (
-          <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
-            <strong>Failed to load history:</strong> {fetchError}
-            <br />
-            <span className="text-xs text-muted-foreground mt-1 block">Check that the <code>interviews</code> table exists in your Supabase project and Row Level Security is enabled.</span>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!fetchError && interviews.length === 0 && (
-          <div className="border-2 border-dashed border-muted-foreground/20 rounded-2xl p-16 text-center bg-muted/5">
-            <Target className="w-14 h-14 text-muted-foreground mx-auto mb-4 opacity-30" />
-            <h3 className="text-xl font-bold mb-2">No interviews yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-balance text-sm">
-              Analyze a recording and it will appear here automatically for you to revisit anytime.
-            </p>
-            <Link href="/analyze">
-              <Button className="shadow-lg shadow-primary/20">Start Your First Analysis</Button>
-            </Link>
-          </div>
-        )}
-
-        {/* History grid */}
-        {interviews.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {interviews.map((interview) => {
-              const style = getScoreStyle(interview.overall_score);
-              return (
-                <Card
-                  key={interview.id}
-                  className={`p-6 bg-card border transition-all duration-200 hover:shadow-lg ${style.ring}`}
-                >
-                  <div className="flex justify-between items-start mb-5">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base capitalize truncate">
-                        {interview.role_target ?? "Interview Analysis"}
-                      </h3>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Calendar className="w-3 h-3 shrink-0" />
-                        {new Date(interview.created_at).toLocaleDateString(undefined, {
-                          month: "short", day: "numeric", year: "numeric",
-                        })}
-                      </p>
+        {!user ? (
+          <Card className="border-dashed border-2 py-20 text-center">
+            <CardContent className="space-y-4">
+              <div className="mx-auto bg-muted w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <LogIn className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h2 className="text-xl font-bold">Please log in to see your history</h2>
+              <p className="text-muted-foreground max-w-xs mx-auto">
+                We store your interview reports securely in your account so you can access them anywhere.
+              </p>
+              <Link href="/login">
+                <Button className="mt-4 rounded-full px-8">Log in now</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : interviews.length === 0 ? (
+          <Card className="border-dashed border-2 py-20 text-center">
+            <CardContent className="space-y-4">
+              <div className="mx-auto bg-muted w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <FileAudio className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h2 className="text-xl font-bold">No interviews analyzed yet</h2>
+              <p className="text-muted-foreground max-w-xs mx-auto">
+                Upload your first recording to start receiving deep behavioral analytics.
+              </p>
+              <Link href="/analyze">
+                <Button className="mt-4 rounded-full px-8">Analyze My First Interview</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {interviews.map((interview) => (
+              <Link key={interview.id} href={`/results/real_analysis_${interview.id}`}>
+                <Card className="group hover:border-primary/50 transition-all cursor-pointer shadow-sm hover:shadow-md bg-card/50 backdrop-blur-sm overflow-hidden">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold font-heading shadow-inner ${
+                        interview.overall_score >= 75 ? 'bg-green-500/10 text-green-500' : 
+                        interview.overall_score >= 50 ? 'bg-yellow-500/10 text-yellow-500' : 
+                        'bg-destructive/10 text-destructive'
+                      }`}>
+                        {interview.overall_score}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold font-heading flex items-center gap-2">
+                          {interview.role_target || 'General Interview'}
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-widest hidden sm:flex">
+                            Analyzed
+                          </Badge>
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1 font-medium">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(interview.created_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })}
+                          </span>
+                          <span className="flex items-center gap-1 uppercase tracking-wider text-[10px] font-bold">
+                            <Target className="w-3 h-3" />
+                            Target: {interview.role_target === 'sde' ? 'Software Engineer' : interview.role_target}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className={`ml-3 w-13 h-13 min-w-[52px] min-h-[52px] rounded-full flex items-center justify-center font-bold text-lg font-heading ${style.badge}`}>
-                      {interview.overall_score}
+                    
+                    <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-4 md:pt-0">
+                       <div className="text-right hidden sm:block">
+                          <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Rejection Prob</p>
+                          <p className={`text-lg font-bold ${interview.overall_score >= 75 ? 'text-green-500' : 'text-destructive'}`}>
+                            {100 - interview.overall_score}%
+                          </p>
+                       </div>
+                       <Button variant="ghost" size="icon" className="group-hover:translate-x-1 group-hover:bg-primary/10 group-hover:text-primary transition-all rounded-full">
+                         <ChevronRight className="w-5 h-5" />
+                       </Button>
                     </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 bg-background/60 hover:bg-muted text-xs"
-                      onClick={() => router.push(`/results/${interview.id}`)}
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> View Report
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8 shrink-0"
-                      onClick={() => handleDelete(interview.id)}
-                      title="Delete this record"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
                   </div>
                 </Card>
-              );
-            })}
+              </Link>
+            ))}
           </div>
         )}
+
       </main>
       <Footer />
     </div>
