@@ -84,17 +84,22 @@ export default function AnalyzePage() {
 
       // Save to Supabase if logged in
       const { data: { user } } = await supabase.auth.getUser();
-      const resultId = `real_analysis_${Date.now()}`;
+      let resultId = `real_analysis_${Date.now()}`;
       
       if (user) {
         try {
-          await supabase.from('interviews').insert({
-            id: resultId.replace('real_analysis_', ''), // Optional: use UUID format or just Date.now suffix
+          const { data: insertedRecord, error: insertError } = await supabase.from('interviews').insert({
             user_id: user.id,
-            overall_score: data.result.overallScore,
+            overall_score: data?.result?.overallScore || 0,
             role_target: role,
             report_data: data.result
-          });
+          }).select('id').single();
+
+          if (insertError) {
+            console.error("Supabase insert error:", insertError);
+          } else if (insertedRecord) {
+            resultId = `real_analysis_${insertedRecord.id}`;
+          }
         } catch (supabaseErr) {
           console.error("Failed to save to Supabase:", supabaseErr);
         }
