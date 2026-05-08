@@ -46,7 +46,7 @@ Step 1 — TRANSCRIBE: Listen carefully and mentally transcribe the full convers
 Step 2 — SPEECH ANALYSIS: For each answer, count filler words (um, uh, like, basically, you know, so). Estimate the pacing/speaking speed in Words Per Minute (WPM). Count notable pauses or silences.
 Step 3 — QUALITY & CONFIDENCE ANALYSIS: For each answer, evaluate Clarity, Depth, Structure, Relevance, and Delivery. Also rate the candidate's Confidence Score (0-100) based on voice modulation, hesitation, and decisiveness. Categorize the question as "Technical" or "Behavioral".
 Step 5 — IMPROVEMENT PLAN: Generate a custom 4-week practice roadmap strictly tailored to exactly what this candidate did wrong in this specific recording. Refer to their specific speaking errors (e.g. "Fix the 14 'basically' fillers used in your Q3 answer") and structural gaps. Avoid generic template tasks.
-Step 6 — PRACTICE BANK: Identify the 10 most critical gaps (technical or behavioral) and generate fresh, targeted practice questions. For each, provide a "Why this?" explanation mapping back to their mistakes, a structured "How to Answer" guide (e.g. STAR), and a professional coach's tip.
+Step 6 — PRACTICE BANK: Identify the 4 most critical gaps (technical or behavioral) and generate fresh, targeted practice questions. For each, provide a "Why this?" explanation mapping back to their mistakes, a structured "How to Answer" guide (e.g. STAR), and a professional coach's tip.
 Step 7 — OUTPUT JSON: Based on your analysis above, output the final JSON.
 
 ---
@@ -134,7 +134,7 @@ CRITICAL RULES:
 
   // 3. Call Gemini
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-lite',
+    model: 'gemini-2.0-flash',
     contents: [
       {
         role: 'user',
@@ -143,7 +143,10 @@ CRITICAL RULES:
           { text: prompt }
         ]
       }
-    ]
+    ],
+    config: {
+      responseMimeType: "application/json",
+    }
   });
 
   // 4. PRIVACY: Immediately delete from Google's servers after analysis
